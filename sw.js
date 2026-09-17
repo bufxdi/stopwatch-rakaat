@@ -1,4 +1,4 @@
-const CACHE_NAME = "stopwatch-rakaat-v2";
+const CACHE_NAME = "stopwatch-rakaat-v3";
 
 const FILES_TO_CACHE = [
     "./",
