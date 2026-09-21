@@ -1,0 +1,4027 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Stopwatch Rakaat</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+
+#nextPrayerCountdown {
+    font-size: 13px;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    white-space: pre-line;
+}
+
+
+/* =====================================================
+   HARI TANGGAL JAM SAAT INI
+   ===================================================== */
+
+#currentDateTime {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-top: 15px;
+}
+
+
+/* =====================================================
+   DIALOG REKAM
+   ===================================================== */
+
+.record-dialog {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    z-index:9999;
+    justify-content:center;
+    align-items:center;
+}
+
+.record-dialog-box {
+    width:85%;
+    max-width:360px;
+    background:white;
+    border-radius:16px;
+    padding:25px 20px;
+    text-align:center;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+}
+
+#recordDialogText {
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:25px;
+}
+
+.record-dialog-buttons {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+
+.record-dialog-buttons button {
+    min-height:55px;
+    font-size:18px;
+    font-weight:bold;
+    border-radius:12px;
+}
+
+#recordYes {
+    background:#4CAF50;
+    color:white;
+}
+
+#recordNo {
+    background:#ddd;
+    color:#222;
+}
+
+
+/* =====================================================
+   BODY
+   ===================================================== */
+
+* {
+    box-sizing:border-box;
+}
+
+body {
+
+    margin-top:20px;
+    margin-bottom:20px;
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#f2f2f2;
+
+    font-family:Arial,sans-serif;
+
+    color:#222;
+}
+
+
+/* =====================================================
+   CONTAINER
+   ===================================================== */
+
+.container {
+
+    width:92%;
+
+    max-width:480px;
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:30px 20px;
+
+    text-align:center;
+
+    box-shadow:0 4px 20px rgba(0,0,0,.12);
+}
+
+
+/* =====================================================
+   JADWAL SHOLAT
+   ===================================================== */
+
+#prayerSchedule {
+
+    width:100%;
+
+    min-height:22px;
+
+    margin-bottom:10px;
+    margin-top:10px;
+
+    font-weight:bold;
+
+    line-height:1.4;
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+    gap:0 8px;
+}
+
+#prayerSchedule span {
+    white-space:nowrap;
+}
+
+
+/* =====================================================
+   STOPWATCH
+   ===================================================== */
+
+#display {
+
+    font-size:clamp(64px,18vw,100px);
+
+    font-weight:bold;
+
+    line-height:1;
+
+    margin-bottom:20px;
+
+    font-variant-numeric:tabular-nums;
+}
+
+
+/* =====================================================
+   PROGRESS RAKAAT
+   ===================================================== */
+
+.progress-container {
+
+    width:100%;
+
+    height:18px;
+
+    background:#ddd;
+
+    border-radius:0;
+
+    overflow:hidden;
+
+    margin-bottom:12px;
+}
+
+#progressBar {
+
+    width:0%;
+
+    height:100%;
+
+    background:#222;
+
+    border-radius:0;
+
+    transition:none;
+}
+
+
+/* =====================================================
+   DESKRIPSI
+   ===================================================== */
+
+#description {
+
+    min-height:80px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:10px;
+
+    margin-bottom:25px;
+
+    border-radius:14px;
+
+    background:#eee;
+
+    font-size:clamp(33px,9vw,90px);
+
+    font-weight:bold;
+}
+
+
+/* =====================================================
+   TOTAL DURASI + PROGRESS
+   ===================================================== */
+
+.total-progress-wrapper {
+
+    width:100%;
+
+    margin-bottom:25px;
+}
+
+
+/* DURASI TOTAL DI ATAS PROGRESS BAR */
+
+#totalDurationDisplay {
+
+    width:100%;
+
+    text-align:center;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    line-height:1;
+
+    margin-bottom:8px;
+
+    font-variant-numeric:tabular-nums;
+}
+
+
+/* BAR TOTAL */
+
+.total-progress-row {
+
+    width:100%;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+}
+
+.total-time {
+
+    width:20%;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+    line-height:1;
+
+    white-space:nowrap;
+
+    font-variant-numeric:tabular-nums;
+}
+
+.total-time.start-time {
+    text-align:left;
+}
+
+.total-time.end-time {
+    text-align:right;
+}
+
+.total-progress-container {
+
+    flex:1;
+
+    height:18px;
+
+    background:#ddd;
+
+    border-radius:0;
+
+    overflow:hidden;
+}
+
+#totalProgressBar {
+
+    width:0%;
+
+    height:100%;
+
+    background:#222;
+
+    border-radius:0;
+
+    transition:none;
+}
+
+
+/* =====================================================
+   BUTTON START / RESET
+   ===================================================== */
+
+.buttons {
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:14px;
+
+    margin-bottom:25px;
+}
+
+button {
+
+    min-height:65px;
+
+    border:none;
+
+    border-radius:14px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    touch-action:manipulation;
+}
+
+#startPause {
+
+    background:#222;
+
+    color:white;
+}
+
+#reset {
+
+    background:#ddd;
+
+    color:#222;
+}
+
+button:active {
+    transform:scale(.97);
+}
+
+#startPause:disabled {
+    cursor:not-allowed;
+}
+
+
+/* =====================================================
+   PILIH SHOLAT
+   ===================================================== */
+
+.prayer-title {
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    margin-bottom:10px;
+}
+
+.prayer-row-1,
+.prayer-row-2 {
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,minmax(0,1fr));
+
+    gap:6px;
+}
+
+.prayer-row-1 {
+    margin-bottom:10px;
+}
+
+.prayer-row-2 {
+    margin-bottom:15px;
+}
+
+.prayer-row-1 button,
+.prayer-row-2 button {
+
+    width:100%;
+
+    min-width:0;
+
+    height:50px;
+
+    min-height:50px;
+
+    max-height:50px;
+
+    padding:4px;
+
+    box-sizing:border-box;
+
+    font-size:12px;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:clip;
+}
+
+.prayer-row-1 button {
+
+    background:#222;
+
+    color:#ddd;
+}
+
+
+/* =====================================================
+   STATUS BUTTON BARIS 2
+   ===================================================== */
+
+.selected-prayer {
+
+    background:#ddd;
+
+    color:#222;
+}
+
+.selected-prayer.yellow {
+
+    background:#FFD700;
+
+    color:#222;
+}
+
+.selected-prayer.green {
+
+    background:#4CAF50;
+
+    color:white;
+}
+
+
+/* =====================================================
+   RESET PILIHAN SHOLAT
+   ===================================================== */
+
+.prayer-reset-container {
+    margin-top:5px;
+}
+
+#prayerReset {
+
+    width:100%;
+
+    min-height:55px;
+
+    background:#eee;
+
+    color:#222;
+
+    font-size:18px;
+}
+
+
+/* =====================================================
+   TABEL REKAMAN SHOLAT
+   ===================================================== */
+
+.record-title {
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    margin-top:30px;
+
+    margin-bottom:10px;
+}
+
+.record-table-wrapper {
+
+    width:100%;
+
+    overflow-x:auto;
+
+    margin-top:10px;
+}
+
+.record-table {
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    table-layout:fixed;
+
+    font-size:11px;
+}
+
+.record-table th,
+.record-table td {
+
+    border:1px solid #999;
+
+    padding:6px 3px;
+
+    text-align:center;
+
+    vertical-align:middle;
+
+    height:42px;
+
+    white-space:nowrap;
+}
+
+.record-table th {
+
+    background:#222;
+
+    color:white;
+
+    font-weight:bold;
+}
+
+.record-table th:first-child {
+    width:30%;
+}
+
+.record-table th:not(:first-child) {
+    width:14%;
+}
+
+.record-table td:first-child {
+    font-weight:bold;
+}
+
+.record-table tbody tr:nth-child(even) {
+    background:#f7f7f7;
+}
+
+
+/* =====================================================
+   SETTING
+   ===================================================== */
+
+.setting-title {
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    margin-top:30px;
+
+    margin-bottom:12px;
+}
+
+.setting-group {
+
+    width:100%;
+
+    text-align:left;
+
+    margin-bottom:20px;
+}
+
+.setting-row {
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    margin-bottom:10px;
+}
+
+.setting-row label {
+
+    flex:1;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+    line-height:1.3;
+}
+
+.setting-row input {
+
+    width:115px;
+
+    height:42px;
+
+    border:1px solid #aaa;
+
+    border-radius:10px;
+
+    padding:5px 8px;
+
+    font-size:17px;
+
+    text-align:center;
+
+    font-weight:bold;
+}
+
+
+/* =====================================================
+   SETTING KOTA
+   ===================================================== */
+
+.city-setting {
+
+    margin-top:5px;
+}
+
+.city-setting label {
+
+    display:block;
+
+    text-align:left;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+    margin-bottom:8px;
+}
+
+#cityInput {
+
+    width:100%;
+
+    height:45px;
+
+    border:1px solid #aaa;
+
+    border-radius:10px;
+
+    padding:8px 10px;
+
+    font-size:15px;
+
+    font-weight:bold;
+}
+
+#cityStatus {
+
+    min-height:18px;
+
+    margin-top:6px;
+
+    font-size:12px;
+
+    font-weight:bold;
+
+    text-align:left;
+}
+
+
+/* =====================================================
+   RESPONSIVE TABLE
+   ===================================================== */
+
+@media (max-width:380px) {
+
+    .record-table {
+        font-size:9px;
+    }
+
+    .record-table th,
+    .record-table td {
+        padding:5px 2px;
+    }
+
+    .setting-row label {
+        font-size:13px;
+    }
+
+    .setting-row input {
+        width:105px;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- =================================================
+         STOPWATCH
+         ================================================= -->
+
+    <div id="display">
+        00:00
+    </div>
+
+
+    <!-- =================================================
+         PROGRESS RAKAAT
+         ================================================= -->
+
+    <div class="progress-container">
+
+        <div id="progressBar"></div>
+
+    </div>
+
+
+    <!-- =================================================
+         DESKRIPSI
+         ================================================= -->
+
+    <div id="description"></div>
+
+
+    <!-- =================================================
+         TOTAL PROGRESS
+         ================================================= -->
+
+    <div class="total-progress-wrapper">
+
+
+        <!-- DURASI TOTAL -->
+
+        <div id="totalDurationDisplay">
+            0:00
+        </div>
+
+
+        <div class="total-progress-row">
+
+
+            <div
+                id="totalStartTime"
+                class="total-time start-time">
+            </div>
+
+
+            <div class="total-progress-container">
+
+                <div id="totalProgressBar"></div>
+
+            </div>
+
+
+            <div
+                id="totalEndTime"
+                class="total-time end-time">
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         START / RESET
+         ================================================= -->
+
+    <div class="buttons">
+
+        <button
+            id="startPause"
+            disabled>
+            Mulai
+        </button>
+
+        <button id="reset">
+            Reset
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         PILIH SHOLAT
+         ================================================= -->
+
+    <div class="prayer-title">
+        Sholat
+    </div>
+
+
+    <!-- BARIS 1 -->
+
+    <div class="prayer-row-1">
+
+        <button data-prayer="Subuh">
+            Subuh
+        </button>
+
+        <button data-prayer="Dhuhur">
+            Dhuhur
+        </button>
+
+        <button data-prayer="Ashr">
+            Ashr
+        </button>
+
+        <button data-prayer="Maghrib">
+            Maghrib
+        </button>
+
+        <button data-prayer="Isya">
+            Isya
+        </button>
+
+    </div>
+
+
+    <!-- BARIS 2 -->
+
+    <div
+        class="prayer-row-2"
+        id="prayerRow2">
+    </div>
+
+
+    <!-- RESET PILIHAN -->
+
+    <div class="prayer-reset-container">
+
+        <button id="prayerReset">
+            Reset
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         HARI TANGGAL JAM SAAT INI
+         ================================================= -->
+
+    <div id="currentDateTime"></div>
+
+
+    <!-- =================================================
+         JADWAL SHOLAT
+         ================================================= -->
+
+    <div id="prayerSchedule">
+        Memuat jadwal sholat...
+    </div>
+
+    <div id="nextPrayerCountdown"></div>
+
+
+    <!-- =================================================
+         TABEL REKAMAN SHOLAT
+         ================================================= -->
+
+    <div class="record-title">
+        Rekaman Pelaksanaan Sholat
+    </div>
+
+
+    <div class="record-table-wrapper">
+
+        <table class="record-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Tanggal & Hari
+                    </th>
+
+                    <th>
+                        Subuh
+                    </th>
+
+                    <th>
+                        Dhuhur
+                    </th>
+
+                    <th>
+                        Ashar
+                    </th>
+
+                    <th>
+                        Maghrib
+                    </th>
+
+                    <th>
+                        Isya
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="recordTableBody">
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- =================================================
+         SETTING DURASI
+         ================================================= -->
+
+    <div class="setting-title">
+        Setting Durasi Sholat
+    </div>
+
+
+    <div class="setting-group">
+
+
+        <div class="setting-row">
+
+            <label for="durationRakaat12">
+                Durasi Rakaat 1 dan 2
+            </label>
+
+            <input
+                id="durationRakaat12"
+                type="number"
+                min="1"
+                step="1">
+        </div>
+
+
+        <div class="setting-row">
+
+            <label for="durationRakaat34">
+                Durasi Rakaat 3 dan 4
+            </label>
+
+            <input
+                id="durationRakaat34"
+                type="number"
+                min="1"
+                step="1">
+        </div>
+
+
+        <div class="setting-row">
+
+            <label for="durationTasyahudAwal">
+                Durasi Tasyahud Awal
+            </label>
+
+            <input
+                id="durationTasyahudAwal"
+                type="number"
+                min="1"
+                step="1">
+        </div>
+
+
+        <div class="setting-row">
+
+            <label for="durationTasyahudAkhir">
+                Durasi Tasyahud Akhir
+            </label>
+
+            <input
+                id="durationTasyahudAkhir"
+                type="number"
+                min="1"
+                step="1">
+        </div>
+
+
+    </div>
+
+
+    <!-- =================================================
+         SETTING KOTA
+         ================================================= -->
+
+    <div class="setting-title">
+        Setting Kota
+    </div>
+
+
+    <div class="setting-group city-setting">
+
+
+        <label for="cityInput">
+            Kota / Kabupaten
+        </label>
+
+
+        <input
+            id="cityInput"
+            type="text"
+            list="cityList"
+            placeholder="Ketik / pilih kota"
+            autocomplete="off">
+
+
+        <datalist id="cityList">
+        </datalist>
+
+
+        <div id="cityStatus"></div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   STORAGE SETTING
+   ===================================================== */
+
+const SETTINGS_STORAGE_KEY =
+    "stopwatchRakaatSettings_v1";
+
+
+/* =====================================================
+   DEFAULT SETTING
+   ===================================================== */
+
+const defaultSettings = {
+
+    rakaat12: 50,
+
+    rakaat34: 50,
+
+    tasyahudAwal: 20,
+
+    tasyahudAkhir: 40,
+
+    cityId: "1301",
+
+    cityName: "KOTA JAKARTA"
+
+};
+
+
+let appSettings = {
+    ...defaultSettings
+};
+
+
+
+/* =====================================================
+   LOAD SETTING
+   ===================================================== */
+
+function loadSettings() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(
+                SETTINGS_STORAGE_KEY
+            );
+
+
+        if (saved) {
+
+            const parsed =
+                JSON.parse(saved);
+
+
+            if (parsed && typeof parsed === "object") {
+
+                appSettings = {
+
+                    ...defaultSettings,
+
+                    ...parsed
+
+                };
+
+            }
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Gagal membaca setting:",
+            error
+        );
+
+        appSettings = {
+            ...defaultSettings
+        };
+
+    }
+
+}
+
+
+
+/* =====================================================
+   SAVE SETTING
+   ===================================================== */
+
+function saveSettings() {
+
+    localStorage.setItem(
+
+        SETTINGS_STORAGE_KEY,
+
+        JSON.stringify(appSettings)
+
+    );
+
+}
+
+
+
+/* =====================================================
+   DOM SETTING
+   ===================================================== */
+
+const durationRakaat12 =
+    document.getElementById(
+        "durationRakaat12"
+    );
+
+const durationRakaat34 =
+    document.getElementById(
+        "durationRakaat34"
+    );
+
+const durationTasyahudAwal =
+    document.getElementById(
+        "durationTasyahudAwal"
+    );
+
+const durationTasyahudAkhir =
+    document.getElementById(
+        "durationTasyahudAkhir"
+    );
+
+const cityInput =
+    document.getElementById(
+        "cityInput"
+    );
+
+const cityList =
+    document.getElementById(
+        "cityList"
+    );
+
+const cityStatus =
+    document.getElementById(
+        "cityStatus"
+    );
+
+const totalDurationDisplay =
+    document.getElementById(
+        "totalDurationDisplay"
+    );
+
+
+
+/* =====================================================
+   ISI SETTING KE FORM
+   ===================================================== */
+
+function renderSettings() {
+
+    durationRakaat12.value =
+        appSettings.rakaat12;
+
+    durationRakaat34.value =
+        appSettings.rakaat34;
+
+    durationTasyahudAwal.value =
+        appSettings.tasyahudAwal;
+
+    durationTasyahudAkhir.value =
+        appSettings.tasyahudAkhir;
+
+    cityInput.value =
+        appSettings.cityName;
+
+}
+
+
+
+/* =====================================================
+   AMBIL ANGKA SETTING
+   ===================================================== */
+
+function getPositiveNumber(
+    input,
+    fallback
+) {
+
+    const value =
+        parseInt(
+            input.value,
+            10
+        );
+
+
+    if (
+        !Number.isFinite(value) ||
+        value <= 0
+    ) {
+
+        input.value =
+            fallback;
+
+        return fallback;
+
+    }
+
+
+    return value;
+
+}
+
+
+
+/* =====================================================
+   UPDATE SETTING DURASI
+   ===================================================== */
+
+function updateDurationSettings() {
+
+    appSettings.rakaat12 =
+        getPositiveNumber(
+            durationRakaat12,
+            defaultSettings.rakaat12
+        );
+
+
+    appSettings.rakaat34 =
+        getPositiveNumber(
+            durationRakaat34,
+            defaultSettings.rakaat34
+        );
+
+
+    appSettings.tasyahudAwal =
+        getPositiveNumber(
+            durationTasyahudAwal,
+            defaultSettings.tasyahudAwal
+        );
+
+
+    appSettings.tasyahudAkhir =
+        getPositiveNumber(
+            durationTasyahudAkhir,
+            defaultSettings.tasyahudAkhir
+        );
+
+
+    saveSettings();
+
+
+    /*
+       Kalau sedang memilih sholat,
+       langsung hitung ulang durasinya.
+    */
+
+    if (activePrayer) {
+
+        activeDuration =
+            prayerPatterns[
+                activePrayer
+            ].duration;
+
+
+        updateTotalDurationDisplay();
+
+        resetStopwatch();
+
+    }
+
+    else {
+
+        updateTotalDurationDisplay();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   EVENT SETTING DURASI
+   ===================================================== */
+
+[
+    durationRakaat12,
+    durationRakaat34,
+    durationTasyahudAwal,
+    durationTasyahudAkhir
+
+].forEach(
+    input => {
+
+        input.addEventListener(
+            "change",
+            updateDurationSettings
+        );
+
+    }
+);
+
+
+
+/* =====================================================
+   POLA SHOLAT DINAMIS
+   ===================================================== */
+
+function buildPrayerPatterns() {
+
+    const r12 =
+        appSettings.rakaat12;
+
+    const r34 =
+        appSettings.rakaat34;
+
+    const ta =
+        appSettings.tasyahudAwal;
+
+    const tk =
+        appSettings.tasyahudAkhir;
+
+
+    return {
+
+
+        /* =============================================
+           SUBUH
+           2 RAKAAT + TASYAHUD AKHIR
+           ============================================= */
+
+        Subuh: {
+
+            stages: [
+
+                {
+                    seconds:0,
+                    text:"S - R - 1"
+                },
+
+                {
+                    seconds:r12,
+                    text:"S - R - 2"
+                },
+
+                {
+                    seconds:r12 * 2,
+                    text:"S - TASY"
+                }
+
+            ],
+
+            duration:
+                (r12 * 2) + tk
+
+        },
+
+
+        /* =============================================
+           DHUHUR
+           ============================================= */
+
+        Dhuhur: {
+
+            stages: [
+
+                {
+                    seconds:0,
+                    text:"D - R - 1"
+                },
+
+                {
+                    seconds:r12,
+                    text:"D - R - 2"
+                },
+
+                {
+                    seconds:r12 * 2,
+                    text:"D - TASY - 1"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta,
+                    text:"D - R - 3"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta + r34,
+                    text:"D - R - 4"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta + (r34 * 2),
+                    text:"D - TASY - 2"
+                }
+
+            ],
+
+            duration:
+                (r12 * 2)
+                +
+                ta
+                +
+                (r34 * 2)
+                +
+                tk
+
+        },
+
+
+        /* =============================================
+           ASHAR
+           ============================================= */
+
+        Ashr: {
+
+            stages: [
+
+                {
+                    seconds:0,
+                    text:"A - R - 1"
+                },
+
+                {
+                    seconds:r12,
+                    text:"A - R - 2"
+                },
+
+                {
+                    seconds:r12 * 2,
+                    text:"A - TASY - 1"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta,
+                    text:"A - R - 3"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta + r34,
+                    text:"A - R - 4"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta + (r34 * 2),
+                    text:"A - TASY - 2"
+                }
+
+            ],
+
+            duration:
+                (r12 * 2)
+                +
+                ta
+                +
+                (r34 * 2)
+                +
+                tk
+
+        },
+
+
+        /* =============================================
+           MAGHRIB
+           2 RAKAAT + TASY AWAL + 1 RAKAAT + TASY AKHIR
+           ============================================= */
+
+        Maghrib: {
+
+            stages: [
+
+                {
+                    seconds:0,
+                    text:"M - R - 1"
+                },
+
+                {
+                    seconds:r12,
+                    text:"M - R - 2"
+                },
+
+                {
+                    seconds:r12 * 2,
+                    text:"M - TASY - 1"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta,
+                    text:"M - R - 3"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta + r34,
+                    text:"M - TASY - 2"
+                }
+
+            ],
+
+            duration:
+                (r12 * 2)
+                +
+                ta
+                +
+                r34
+                +
+                tk
+
+        },
+
+
+        /* =============================================
+           ISYA
+           ============================================= */
+
+        Isya: {
+
+            stages: [
+
+                {
+                    seconds:0,
+                    text:"I - R - 1"
+                },
+
+                {
+                    seconds:r12,
+                    text:"I - R - 2"
+                },
+
+                {
+                    seconds:r12 * 2,
+                    text:"I - TASY - 1"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta,
+                    text:"I - R - 3"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta + r34,
+                    text:"I - R - 4"
+                },
+
+                {
+                    seconds:
+                        (r12 * 2) + ta + (r34 * 2),
+                    text:"I - TASY - 2"
+                }
+
+            ],
+
+            duration:
+                (r12 * 2)
+                +
+                ta
+                +
+                (r34 * 2)
+                +
+                tk
+
+        }
+
+    };
+
+}
+
+
+/*
+   prayerPatterns sekarang bukan const tetap.
+   Setting user akan membuat pola baru.
+*/
+
+let prayerPatterns =
+    buildPrayerPatterns();
+
+
+
+/* =====================================================
+   FORMAT DURASI TOTAL
+   Contoh:
+   210 detik -> 3:30
+   ===================================================== */
+
+function formatDurationShort(
+    totalSeconds
+) {
+
+    const minutes =
+        Math.floor(
+            totalSeconds / 60
+        );
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    return (
+
+        minutes +
+
+        ":" +
+
+        String(seconds)
+            .padStart(2,"0")
+
+    );
+
+}
+
+
+
+/* =====================================================
+   UPDATE TAMPILAN DURASI TOTAL
+   ===================================================== */
+
+function updateTotalDurationDisplay() {
+
+    if (!activePrayer) {
+
+        totalDurationDisplay.textContent =
+            "0:00";
+
+        return;
+
+    }
+
+
+    const duration =
+        prayerPatterns[
+            activePrayer
+        ].duration;
+
+
+    totalDurationDisplay.textContent =
+        formatDurationShort(
+            duration
+        );
+
+}
+
+
+
+/* =====================================================
+   DOM ELEMENT
+   ===================================================== */
+
+const display =
+    document.getElementById("display");
+
+const description =
+    document.getElementById("description");
+
+const progressBar =
+    document.getElementById("progressBar");
+
+const totalProgressBar =
+    document.getElementById("totalProgressBar");
+
+const totalStartTime =
+    document.getElementById("totalStartTime");
+
+const totalEndTime =
+    document.getElementById("totalEndTime");
+
+const startPauseButton =
+    document.getElementById("startPause");
+
+const resetButton =
+    document.getElementById("reset");
+
+const prayerRow2 =
+    document.getElementById("prayerRow2");
+
+const prayerReset =
+    document.getElementById("prayerReset");
+
+const prayerSchedule =
+    document.getElementById("prayerSchedule");
+
+const recordTableBody =
+    document.getElementById("recordTableBody");
+
+const currentDateTime =
+    document.getElementById("currentDateTime");
+
+
+
+/* =====================================================
+   VARIABEL STOPWATCH
+   ===================================================== */
+
+let startTime = null;
+
+let prayerStartTime = null;
+
+let prayerEndTime = null;
+
+let elapsed = 0;
+
+let timerInterval = null;
+
+let isRunning = false;
+
+let activePrayer = null;
+
+let activeDuration = Infinity;
+
+
+
+/* =====================================================
+   VARIABEL JADWAL SHOLAT
+   ===================================================== */
+
+let prayerScheduleData = [];
+
+let prayerScheduleLoadedDate = "";
+
+
+
+/* =====================================================
+   VARIABEL KOTA
+   ===================================================== */
+
+let cityData = [];
+
+let cityScheduleLoading = false;
+
+
+
+/* =====================================================
+   LOCAL STORAGE REKAMAN
+   ===================================================== */
+
+const RECORD_STORAGE_KEY =
+    "stopwatchRakaatRecords_v1";
+
+let prayerRecords = [];
+
+
+
+/* =====================================================
+   FORMAT STOPWATCH
+   ===================================================== */
+
+function formatTime(totalSeconds) {
+
+    const minutes =
+        Math.floor(totalSeconds / 60);
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    return (
+
+        String(minutes).padStart(2,"0")
+
+        +
+
+        ":"
+
+        +
+
+        String(seconds).padStart(2,"0")
+
+    );
+
+}
+
+
+
+/* =====================================================
+   FORMAT CLOCK
+   ===================================================== */
+
+function formatClock(date) {
+
+    if (!date) {
+        return "";
+    }
+
+
+    return (
+
+        String(date.getHours()).padStart(2,"0")
+
+        +
+
+        ":"
+
+        +
+
+        String(date.getMinutes()).padStart(2,"0")
+
+        +
+
+        ":"
+
+        +
+
+        String(date.getSeconds()).padStart(2,"0")
+
+    );
+
+}
+
+
+
+/* =====================================================
+   FORMAT DATE KEY
+   ===================================================== */
+
+function formatDateKey(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(date.getMonth() + 1)
+            .padStart(2,"0");
+
+    const day =
+        String(date.getDate())
+            .padStart(2,"0");
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+
+/* =====================================================
+   FORMAT TANGGAL TABEL
+   ===================================================== */
+
+function formatTableDate(date) {
+
+    const day =
+        String(date.getDate())
+            .padStart(2,"0");
+
+    const month =
+        String(date.getMonth() + 1)
+            .padStart(2,"0");
+
+    const year =
+        date.getFullYear();
+
+
+    return `${day}/${month}/${year}`;
+
+}
+
+
+
+/* =====================================================
+   NAMA HARI
+   ===================================================== */
+
+function getDayName(date) {
+
+    const names = [
+
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu"
+
+    ];
+
+
+    return names[
+        date.getDay()
+    ];
+
+}
+
+
+
+/* =====================================================
+   HARI TANGGAL JAM SAAT INI
+   ===================================================== */
+
+function updateCurrentDateTime() {
+
+    const now =
+        new Date();
+
+    const day =
+        getDayName(now);
+
+    const date =
+        formatTableDate(now);
+
+    const time =
+        formatClock(now)
+            .replaceAll(":",".");
+
+
+    currentDateTime.textContent =
+
+        day +
+
+        " - " +
+
+        date +
+
+        " - " +
+
+        time;
+
+}
+
+
+
+/* =====================================================
+   FONT JADWAL = 20% FONT STOPWATCH
+   ===================================================== */
+
+function updatePrayerScheduleFont() {
+
+    const stopwatchFontSize =
+        parseFloat(
+            getComputedStyle(display)
+                .fontSize
+        );
+
+
+    prayerSchedule.style.fontSize =
+        (stopwatchFontSize * 0.2) + "px";
+
+
+    currentDateTime.style.fontSize =
+        (stopwatchFontSize * 0.2) + "px";
+
+}
+
+
+
+/* =====================================================
+   LOAD DATA REKAMAN
+   ===================================================== */
+
+function loadPrayerRecords() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(
+                RECORD_STORAGE_KEY
+            );
+
+
+        if (saved) {
+
+            const parsed =
+                JSON.parse(saved);
+
+
+            if (Array.isArray(parsed)) {
+
+                prayerRecords =
+                    parsed.slice(0,7);
+
+            }
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Gagal membaca localStorage:",
+            error
+        );
+
+        prayerRecords = [];
+
+    }
+
+
+    renderPrayerRecords();
+
+}
+
+
+
+/* =====================================================
+   SIMPAN DATA REKAMAN
+   ===================================================== */
+
+function savePrayerRecords() {
+
+    localStorage.setItem(
+
+        RECORD_STORAGE_KEY,
+
+        JSON.stringify(
+            prayerRecords
+        )
+
+    );
+
+}
+
+
+
+/* =====================================================
+   RENDER TABEL REKAMAN
+   ===================================================== */
+
+function renderPrayerRecords() {
+
+    recordTableBody.innerHTML =
+        "";
+
+
+    for (
+        let i = 0;
+        i < 7;
+        i++
+    ) {
+
+        const row =
+            document.createElement("tr");
+
+
+        const record =
+            prayerRecords[i] || null;
+
+
+        const dateCell =
+            document.createElement("td");
+
+
+        if (record) {
+
+            dateCell.innerHTML =
+                record.dateDisplay;
+
+        }
+
+        else {
+
+            dateCell.textContent =
+                "";
+
+        }
+
+
+        row.appendChild(
+            dateCell
+        );
+
+
+        const prayerNames = [
+
+            "Subuh",
+            "Dhuhur",
+            "Ashr",
+            "Maghrib",
+            "Isya"
+
+        ];
+
+
+        prayerNames.forEach(
+            prayerName => {
+
+                const cell =
+                    document.createElement("td");
+
+
+                if (
+
+                    record &&
+
+                    record.prayers &&
+
+                    record.prayers[
+                        prayerName
+                    ]
+
+                ) {
+
+                    cell.textContent =
+                        record.prayers[
+                            prayerName
+                        ];
+
+                }
+
+                else {
+
+                    cell.textContent =
+                        "";
+
+                }
+
+
+                row.appendChild(
+                    cell
+                );
+
+            }
+        );
+
+
+        recordTableBody.appendChild(
+            row
+        );
+
+    }
+
+}
+
+
+
+/* =====================================================
+   REKAM PELAKSANAAN SHOLAT
+   ===================================================== */
+
+function recordPrayerExecution(
+    prayerName,
+    recordDate
+) {
+
+    const dateKey =
+        formatDateKey(recordDate);
+
+
+    const dateDisplay =
+
+        formatTableDate(
+            recordDate
+        )
+
+        +
+
+        "<br>" +
+
+        getDayName(
+            recordDate
+        );
+
+
+    let existingRecord =
+        prayerRecords.find(
+            record =>
+                record.dateKey ===
+                dateKey
+        );
+
+
+    if (!existingRecord) {
+
+        existingRecord = {
+
+            dateKey:
+                dateKey,
+
+            dateDisplay:
+                dateDisplay,
+
+            prayers:{}
+
+        };
+
+
+        prayerRecords.unshift(
+            existingRecord
+        );
+
+
+        if (
+            prayerRecords.length > 7
+        ) {
+
+            prayerRecords =
+                prayerRecords.slice(
+                    0,
+                    7
+                );
+
+        }
+
+    }
+
+
+    existingRecord.prayers[
+        prayerName
+    ] = formatClock(
+        recordDate
+    );
+
+
+    savePrayerRecords();
+
+    renderPrayerRecords();
+
+}
+
+
+
+/* =====================================================
+   AMBIL DAFTAR KOTA DARI MYQURAN
+   ===================================================== */
+
+async function loadCityList() {
+
+    try {
+
+        cityStatus.textContent =
+            "Memuat daftar kota...";
+
+
+        const response =
+            await fetch(
+                "https://api.myquran.com/v2/sholat/kota/semua"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Gagal mengambil daftar kota"
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (
+            !result.data ||
+            !Array.isArray(result.data)
+        ) {
+
+            throw new Error(
+                "Format daftar kota tidak sesuai"
+            );
+
+        }
+
+
+        cityData =
+            result.data;
+
+
+        cityList.innerHTML =
+            "";
+
+
+        cityData.forEach(
+            city => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    city.lokasi;
+
+
+                cityList.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        cityStatus.textContent =
+            "Kota aktif: " +
+            appSettings.cityName;
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "City API error:",
+            error
+        );
+
+
+        cityStatus.textContent =
+            "Daftar kota tidak tersedia";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   CARI KOTA
+   ===================================================== */
+
+function findCityByName(
+    cityName
+) {
+
+    const normalized =
+        cityName
+            .trim()
+            .toUpperCase();
+
+
+    return cityData.find(
+        city =>
+            city.lokasi
+                .toUpperCase() ===
+            normalized
+    );
+
+}
+
+
+
+/* =====================================================
+   PILIH / INPUT KOTA
+   ===================================================== */
+
+cityInput.addEventListener(
+    "change",
+    applyCity
+);
+
+
+cityInput.addEventListener(
+    "blur",
+    applyCity
+);
+
+
+
+async function applyCity() {
+
+    const typedName =
+        cityInput.value.trim();
+
+
+    if (!typedName) {
+
+        cityInput.value =
+            appSettings.cityName;
+
+        return;
+
+    }
+
+
+    const city =
+        findCityByName(
+            typedName
+        );
+
+
+    if (!city) {
+
+        cityStatus.textContent =
+            "Kota tidak ditemukan dalam daftar MyQuran";
+
+        cityInput.value =
+            appSettings.cityName;
+
+        return;
+
+    }
+
+
+    appSettings.cityId =
+        city.id;
+
+
+    appSettings.cityName =
+        city.lokasi;
+
+
+    saveSettings();
+
+
+    cityInput.value =
+        city.lokasi;
+
+
+    cityStatus.textContent =
+        "Kota aktif: " +
+        city.lokasi;
+
+
+    await loadPrayerSchedule();
+
+}
+
+
+
+/* =====================================================
+   AMBIL JADWAL 1 HARI DARI API
+   ===================================================== */
+
+async function fetchPrayerDay(
+    date
+) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(date.getMonth() + 1)
+            .padStart(2,"0");
+
+    const day =
+        String(date.getDate())
+            .padStart(2,"0");
+
+
+    const url =
+
+        `https://api.myquran.com/v2/sholat/jadwal/${appSettings.cityId}/${year}/${month}/${day}`;
+
+
+    const response =
+        await fetch(url);
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Gagal mengambil data API"
+        );
+
+    }
+
+
+    const result =
+        await response.json();
+
+
+    if (
+
+        !result.data ||
+
+        !result.data.jadwal
+
+    ) {
+
+        throw new Error(
+            "Format data API tidak sesuai"
+        );
+
+    }
+
+
+    return result.data.jadwal;
+
+}
+
+
+
+/* =====================================================
+   BUAT OBJECT WAKTU SHOLAT
+   ===================================================== */
+
+function createPrayerEvent(
+    date,
+    prayerName,
+    timeText
+) {
+
+    if (!timeText) {
+        return null;
+    }
+
+
+    const parts =
+        timeText.split(":");
+
+
+    const hour =
+        parseInt(
+            parts[0],
+            10
+        );
+
+
+    const minute =
+        parseInt(
+            parts[1],
+            10
+        );
+
+
+    const datetime =
+
+        new Date(
+
+            date.getFullYear(),
+
+            date.getMonth(),
+
+            date.getDate(),
+
+            hour,
+
+            minute,
+
+            0,
+
+            0
+
+        );
+
+
+    return {
+
+        name:
+            prayerName,
+
+        time:
+            timeText,
+
+        datetime:
+            datetime,
+
+        dateKey:
+            formatDateKey(date)
+
+    };
+
+}
+
+
+
+/* =====================================================
+   LOAD JADWAL HARI INI + BESOK
+   ===================================================== */
+
+async function loadPrayerSchedule() {
+
+    if (cityScheduleLoading) {
+        return;
+    }
+
+
+    cityScheduleLoading =
+        true;
+
+
+    try {
+
+        prayerSchedule.innerHTML =
+            "<span>Memuat jadwal...</span>";
+
+
+        const today =
+            new Date();
+
+
+        const tomorrow =
+            new Date(today);
+
+
+        tomorrow.setDate(
+            tomorrow.getDate() + 1
+        );
+
+
+        const [
+
+            todaySchedule,
+
+            tomorrowSchedule
+
+        ] =
+
+            await Promise.all([
+
+                fetchPrayerDay(today),
+
+                fetchPrayerDay(tomorrow)
+
+            ]);
+
+
+        const newData = [];
+
+
+        const schedules = [
+
+            {
+                date:
+                    today,
+
+                data:
+                    todaySchedule
+            },
+
+            {
+                date:
+                    tomorrow,
+
+                data:
+                    tomorrowSchedule
+            }
+
+        ];
+
+
+        schedules.forEach(
+            item => {
+
+                const date =
+                    item.date;
+
+
+                const schedule =
+                    item.data;
+
+
+                const prayers = [
+
+                    {
+                        name:
+                            "Subuh",
+
+                        time:
+                            schedule.subuh
+                    },
+
+                    {
+                        name:
+                            "Dhuhur",
+
+                        time:
+                            schedule.dzuhur
+                    },
+
+                    {
+                        name:
+                            "Ashar",
+
+                        time:
+                            schedule.ashar
+                    },
+
+                    {
+                        name:
+                            "Maghrib",
+
+                        time:
+                            schedule.maghrib
+                    },
+
+                    {
+                        name:
+                            "Isya",
+
+                        time:
+                            schedule.isya
+                    }
+
+                ];
+
+
+                prayers.forEach(
+                    prayer => {
+
+                        const event =
+                            createPrayerEvent(
+
+                                date,
+
+                                prayer.name,
+
+                                prayer.time
+
+                            );
+
+
+                        if (event) {
+
+                            newData.push(
+                                event
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        prayerScheduleData =
+            newData.sort(
+
+                (a,b) =>
+                    a.datetime -
+                    b.datetime
+
+            );
+
+
+        prayerScheduleLoadedDate =
+            formatDateKey(
+                new Date()
+            );
+
+
+        updatePrayerScheduleDisplay();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Prayer API error:",
+            error
+        );
+
+
+        prayerSchedule.innerHTML =
+
+            "<span>Jadwal sholat tidak tersedia</span>";
+
+    }
+
+    finally {
+
+        cityScheduleLoading =
+            false;
+
+    }
+
+}
+
+
+
+/* =====================================================
+   TAMPILKAN 5 SHOLAT TERDEKAT
+   ===================================================== */
+
+function updatePrayerScheduleDisplay() {
+
+    const now =
+        new Date();
+
+
+    const past =
+
+        prayerScheduleData
+
+            .filter(
+                prayer =>
+                    prayer.datetime <= now
+            );
+
+
+    const upcoming =
+
+        prayerScheduleData
+
+            .filter(
+                prayer =>
+                    prayer.datetime > now
+            );
+
+
+    const lastPastPrayer =
+        past.length > 0
+            ? past[past.length - 1]
+            : null;
+
+
+    const displayPrayers = [];
+
+
+    if (lastPastPrayer) {
+
+        displayPrayers.push(
+            lastPastPrayer
+        );
+
+    }
+
+
+    displayPrayers.push(
+        ...upcoming.slice(0, 6)
+    );
+
+
+    const nextPrayerCountdown =
+        document.getElementById(
+            "nextPrayerCountdown"
+        );
+
+
+    if (
+        upcoming.length > 0
+    ) {
+
+        const nextPrayer =
+            upcoming[0];
+
+
+        const difference =
+            nextPrayer.datetime.getTime()
+            -
+            now.getTime();
+
+
+        const totalSeconds =
+            Math.floor(
+                difference / 1000
+            );
+
+
+        const hours =
+            Math.floor(
+                totalSeconds / 3600
+            );
+
+
+        const minutes =
+            Math.floor(
+                (totalSeconds % 3600) / 60
+            );
+
+
+        const seconds =
+            totalSeconds % 60;
+
+
+        nextPrayerCountdown.textContent =
+
+            "Sholat terdekat dalam waktu \n" +
+
+            hours +
+
+            " jam " +
+
+            minutes +
+
+            " menit " +
+
+            seconds +
+
+            " detik";
+
+    }
+
+    else {
+
+        nextPrayerCountdown.textContent =
+            "";
+
+    }
+
+
+    if (
+        displayPrayers.length === 0
+    ) {
+
+        prayerSchedule.innerHTML =
+            "<span>Memuat jadwal...</span>";
+
+        return;
+
+    }
+
+
+    prayerSchedule.innerHTML =
+        "";
+
+
+    displayPrayers.forEach(
+        (prayer,index) => {
+
+            const span =
+                document.createElement(
+                    "span"
+                );
+
+
+            const dayLabel =
+
+                prayer.dateKey ===
+                formatDateKey(now)
+
+                    ?
+
+                ""
+
+                    :
+
+                getDayName(
+                    prayer.datetime
+                ) + " ";
+
+
+            span.textContent =
+
+                dayLabel +
+
+                prayer.name +
+
+                " " +
+
+                prayer.time;
+
+
+            prayerSchedule.appendChild(
+                span
+            );
+
+
+            if (
+                index <
+                upcoming.length - 1
+            ) {
+
+                const separator =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                separator.textContent =
+                    "|";
+
+
+                prayerSchedule.appendChild(
+                    separator
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+
+/* =====================================================
+   CEK PERGANTIAN HARI
+   ===================================================== */
+
+function checkPrayerSchedule() {
+
+    const todayKey =
+        formatDateKey(
+            new Date()
+        );
+
+
+    if (
+
+        todayKey !==
+        prayerScheduleLoadedDate
+
+    ) {
+
+        loadPrayerSchedule();
+
+        return;
+
+    }
+
+
+    updatePrayerScheduleDisplay();
+
+}
+
+
+
+/* =====================================================
+   UPDATE DISPLAY STOPWATCH
+   ===================================================== */
+
+function updateDisplay() {
+
+    const wholeSeconds =
+        Math.floor(elapsed);
+
+
+    display.textContent =
+        formatTime(
+            wholeSeconds
+        );
+
+
+    if (!activePrayer) {
+
+        description.textContent =
+            "";
+
+        progressBar.style.width =
+            "0%";
+
+        return;
+
+    }
+
+
+    const stages =
+        prayerPatterns[
+            activePrayer
+        ].stages;
+
+
+    let currentStage =
+        stages[0];
+
+
+    let nextStage =
+        null;
+
+
+    for (
+        let i = 0;
+        i < stages.length;
+        i++
+    ) {
+
+        if (
+
+            wholeSeconds >=
+            stages[i].seconds
+
+        ) {
+
+            currentStage =
+                stages[i];
+
+
+            nextStage =
+                stages[i + 1] ||
+                null;
+
+        }
+
+    }
+
+
+    description.textContent =
+        currentStage.text;
+
+
+    const stageStart =
+        currentStage.seconds;
+
+
+    const stageEnd =
+
+        nextStage
+
+            ?
+
+        nextStage.seconds
+
+            :
+
+        activeDuration;
+
+
+    let stageProgress;
+
+
+    if (
+        stageEnd === stageStart
+    ) {
+
+        stageProgress =
+            100;
+
+    }
+
+    else {
+
+        stageProgress =
+
+            (
+
+                (
+
+                    wholeSeconds -
+                    stageStart
+
+                )
+
+                /
+
+                (
+
+                    stageEnd -
+                    stageStart
+
+                )
+
+            )
+
+            * 100;
+
+    }
+
+
+    stageProgress =
+
+        Math.max(
+
+            0,
+
+            Math.min(
+                100,
+                stageProgress
+            )
+
+        );
+
+
+    progressBar.style.width =
+        stageProgress + "%";
+
+
+    updateTotalProgress();
+
+}
+
+
+
+/* =====================================================
+   TOTAL PROGRESS
+   ===================================================== */
+
+function updateTotalProgress() {
+
+    if (
+
+        prayerStartTime === null ||
+
+        activeDuration === Infinity
+
+    ) {
+
+        totalProgressBar.style.width =
+            "0%";
+
+        return;
+
+    }
+
+
+    const wholeSeconds =
+        Math.floor(elapsed);
+
+
+    const progress =
+
+        Math.max(
+
+            0,
+
+            Math.min(
+
+                100,
+
+                (
+
+                    wholeSeconds /
+                    activeDuration
+
+                )
+
+                * 100
+
+            )
+
+        );
+
+
+    totalProgressBar.style.width =
+        progress + "%";
+
+}
+
+
+
+/* =====================================================
+   RESET STOPWATCH
+   ===================================================== */
+
+function resetStopwatch() {
+
+    clearInterval(
+        timerInterval
+    );
+
+
+    timerInterval =
+        null;
+
+
+    isRunning =
+        false;
+
+
+    startTime =
+        null;
+
+
+    prayerStartTime =
+        null;
+
+
+    prayerEndTime =
+        null;
+
+
+    elapsed =
+        0;
+
+
+    display.textContent =
+        "00:00";
+
+
+    progressBar.style.width =
+        "0%";
+
+
+    totalProgressBar.style.width =
+        "0%";
+
+
+    totalStartTime.textContent =
+        "";
+
+
+    totalEndTime.textContent =
+        "";
+
+
+    updateTotalDurationDisplay();
+
+
+    if (activePrayer) {
+
+        const pattern =
+            prayerPatterns[
+                activePrayer
+            ];
+
+
+        description.textContent =
+            pattern.stages[0].text;
+
+    }
+
+    else {
+
+        description.textContent =
+            "";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   MULAI STOPWATCH
+   ===================================================== */
+
+function startStopwatch() {
+
+    if (
+
+        !activePrayer ||
+
+        isRunning
+
+    ) {
+
+        return;
+
+    }
+
+
+    const pattern =
+        prayerPatterns[
+            activePrayer
+        ];
+
+
+    activeDuration =
+        pattern.duration;
+
+
+    updateTotalDurationDisplay();
+
+
+    /*
+       Tampilkan pertanyaan
+       YA / TIDAK
+    */
+
+    const recordDialog =
+        document.getElementById(
+            "recordDialog"
+        );
+
+
+    const recordDialogText =
+        document.getElementById(
+            "recordDialogText"
+        );
+
+
+    const recordYes =
+        document.getElementById(
+            "recordYes"
+        );
+
+
+    const recordNo =
+        document.getElementById(
+            "recordNo"
+        );
+
+
+    recordDialogText.textContent =
+
+        "Rekam jam pelaksanaan sholat " +
+
+        activePrayer +
+
+        "?";
+
+
+    recordDialog.style.display =
+        "flex";
+
+
+    /*
+       Fungsi setelah user memilih
+       YA atau TIDAK
+    */
+
+    function continueStart(
+        shouldRecord
+    ) {
+
+        recordDialog.style.display =
+            "none";
+
+
+        const decisionTime =
+            new Date();
+
+
+        if (
+            shouldRecord === true
+        ) {
+
+            recordPrayerExecution(
+
+                activePrayer,
+
+                decisionTime
+
+            );
+
+        }
+
+
+        prayerStartTime =
+            decisionTime;
+
+
+        prayerEndTime =
+
+            new Date(
+
+                prayerStartTime.getTime()
+
+                +
+
+                activeDuration * 1000
+
+            );
+
+
+        startTime =
+            decisionTime;
+
+
+        elapsed =
+            0;
+
+
+        totalStartTime.textContent =
+            formatClock(
+                prayerStartTime
+            );
+
+
+        totalEndTime.textContent =
+            formatClock(
+                prayerEndTime
+            );
+
+
+        isRunning =
+            true;
+
+
+        updateDisplay();
+
+
+        timerInterval =
+
+            setInterval(
+                () => {
+
+                    const now =
+                        new Date();
+
+
+                    elapsed =
+
+                        (
+
+                            now.getTime() -
+                            startTime.getTime()
+
+                        )
+
+                        /
+
+                        1000;
+
+
+                    if (
+
+                        elapsed >=
+                        activeDuration
+
+                    ) {
+
+                        elapsed =
+                            activeDuration;
+
+
+                        updateDisplay();
+
+
+                        clearInterval(
+                            timerInterval
+                        );
+
+
+                        timerInterval =
+                            null;
+
+
+                        isRunning =
+                            false;
+
+
+                        return;
+
+                    }
+
+
+                    updateDisplay();
+
+                },
+
+                200
+
+            );
+
+
+        recordYes.onclick =
+            null;
+
+        recordNo.onclick =
+            null;
+
+    }
+
+
+    /*
+       Tombol YA
+    */
+
+    recordYes.onclick =
+        function() {
+
+            continueStart(true);
+
+        };
+
+
+    /*
+       Tombol TIDAK
+    */
+
+    recordNo.onclick =
+        function() {
+
+            continueStart(false);
+
+        };
+
+}
+
+
+
+/* =====================================================
+   BUTTON MULAI
+   ===================================================== */
+
+startPauseButton.addEventListener(
+
+    "click",
+
+    startStopwatch
+
+);
+
+
+
+/* =====================================================
+   BUTTON RESET
+   ===================================================== */
+
+resetButton.addEventListener(
+
+    "click",
+
+    () => {
+
+        resetStopwatch();
+
+    }
+
+);
+
+
+
+/* =====================================================
+   BUTTON SHOLAT BARIS 1
+   ===================================================== */
+
+document
+    .querySelectorAll(
+        ".prayer-row-1 button"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+
+                "click",
+
+                () => {
+
+                    const prayer =
+                        button.dataset.prayer;
+
+
+                    let existing =
+                        document.querySelector(
+
+                            `.prayer-row-2 button[data-prayer="${prayer}"]`
+
+                        );
+
+
+                    if (!existing) {
+
+                        existing =
+                            document.createElement(
+                                "button"
+                            );
+
+
+                        existing.dataset.prayer =
+                            prayer;
+
+
+                        existing.textContent =
+                            prayer;
+
+
+                        existing.className =
+                            "selected-prayer";
+
+
+                        prayerRow2.appendChild(
+                            existing
+                        );
+
+
+                        addPrayerButtonLogic(
+                            existing
+                        );
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+
+/* =====================================================
+   LOGIKA BUTTON BARIS 2
+   ===================================================== */
+
+function addPrayerButtonLogic(button) {
+
+    button.addEventListener(
+
+        "click",
+
+        () => {
+
+
+            /*
+               GRAY -> YELLOW
+            */
+
+            if (
+
+                !button.classList.contains(
+                    "yellow"
+                )
+
+                &&
+
+                !button.classList.contains(
+                    "green"
+                )
+
+            ) {
+
+                button.classList.add(
+                    "yellow"
+                );
+
+
+                button.classList.remove(
+                    "green"
+                );
+
+
+                activePrayer =
+                    button.dataset.prayer;
+
+
+                activeDuration =
+
+                    prayerPatterns[
+                        activePrayer
+                    ].duration;
+
+
+                resetStopwatch();
+
+
+                description.textContent =
+
+                    prayerPatterns[
+                        activePrayer
+                    ].stages[0].text;
+
+
+                updateTotalDurationDisplay();
+
+
+                startPauseButton.disabled =
+                    false;
+
+
+                return;
+
+            }
+
+
+            /*
+               YELLOW -> GREEN
+            */
+
+            if (
+
+                button.classList.contains(
+                    "yellow"
+                )
+
+            ) {
+
+                button.classList.remove(
+                    "yellow"
+                );
+
+
+                button.classList.add(
+                    "green"
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+               GREEN -> GRAY
+            */
+
+            if (
+
+                button.classList.contains(
+                    "green"
+                )
+
+            ) {
+
+                button.classList.remove(
+                    "green"
+                );
+
+
+                activePrayer =
+                    null;
+
+
+                activeDuration =
+                    Infinity;
+
+
+                resetStopwatch();
+
+
+                startPauseButton.disabled =
+                    true;
+
+            }
+
+        }
+
+    );
+
+}
+
+
+
+/* =====================================================
+   RESET PILIHAN SHOLAT
+   ===================================================== */
+
+prayerReset.addEventListener(
+
+    "click",
+
+    () => {
+
+        prayerRow2.innerHTML =
+            "";
+
+
+        activePrayer =
+            null;
+
+
+        activeDuration =
+            Infinity;
+
+
+        startPauseButton.disabled =
+            true;
+
+
+        resetStopwatch();
+
+    }
+
+);
+
+
+
+/* =====================================================
+   RESPONSIVE FONT JADWAL
+   ===================================================== */
+
+window.addEventListener(
+
+    "resize",
+
+    updatePrayerScheduleFont
+
+);
+
+
+
+/* =====================================================
+   INITIALIZATION
+   ===================================================== */
+
+loadSettings();
+
+renderSettings();
+
+prayerPatterns =
+    buildPrayerPatterns();
+
+updateTotalDurationDisplay();
+
+updatePrayerScheduleFont();
+
+updateCurrentDateTime();
+
+loadPrayerRecords();
+
+loadCityList();
+
+loadPrayerSchedule();
+
+
+/*
+   Update hari, tanggal, dan jam
+   setiap 1 detik.
+*/
+
+setInterval(
+
+    updateCurrentDateTime,
+
+    1000
+
+);
+
+
+/*
+   Cek jadwal setiap 1 detik.
+*/
+
+setInterval(
+
+    checkPrayerSchedule,
+
+    1000
+
+);
+
+</script>
+
+
+<!-- =====================================================
+     DIALOG KONFIRMASI REKAM
+     ===================================================== -->
+
+<div
+    id="recordDialog"
+    class="record-dialog">
+
+    <div class="record-dialog-box">
+
+        <div id="recordDialogText">
+
+            Rekam jam pelaksanaan sholat?
+
+        </div>
+
+
+        <div class="record-dialog-buttons">
+
+            <button id="recordYes">
+                YA
+            </button>
+
+            <button id="recordNo">
+                TIDAK
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+        navigator.serviceWorker.register("./sw.js")
+            .then(() => {
+
+                console.log("Service Worker berhasil didaftarkan");
+
+            })
+            .catch(error => {
+
+                console.error(
+                    "Service Worker gagal:",
+                    error
+                );
+
+            });
+
+    });
+
+}
+
+</script>
+
+
+</body>
+
+</html>
