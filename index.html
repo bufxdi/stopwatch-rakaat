@@ -591,6 +591,12 @@ button:active {
     background:#f7f7f7;
 }
 
+#clearRecords {
+    margin-top: 15px;
+    padding: 6px 18px;
+    font-size: 18px;
+    height: 25px;
+}      
 
 /* =====================================================
    SETTING
@@ -958,6 +964,8 @@ button:active {
             </tbody>
 
         </table>
+
+        <button id="clearRecords">CLEAR</button>  
 
     </div>
 
@@ -3891,8 +3899,34 @@ prayerReset.addEventListener(
 
 );
 
+const clearRecords =
+    document.getElementById(
+        "clearRecords"
+    );
 
+clearRecords.addEventListener(
+    "click",
+    function () {
 
+        if (
+            !confirm(
+                "Hapus semua data pelaksanaan sholat?"
+            )
+        ) {
+            return;
+        }
+
+        prayerRecords = [];
+
+        localStorage.removeItem(
+            "stopwatchRakaatRecords_v1"
+        );
+
+        renderPrayerRecords();
+
+    }
+);
+          
 /* =====================================================
    RESPONSIVE FONT JADWAL
    ===================================================== */
