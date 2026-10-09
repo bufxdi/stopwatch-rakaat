@@ -370,6 +370,24 @@ body {
     transition: none;
 }
 
+/* PENYESUAIAN BAR TOTAL DI HP */
+
+@media (max-width: 600px) {
+
+    .total-progress-row {
+        grid-template-columns: max-content minmax(0, 1fr) max-content;
+        column-gap: 8px;
+    }
+
+    .total-time.start-time {
+        text-align: right;
+    }
+
+    .total-time.end-time {
+        text-align: left;
+    }
+
+}
 
 /* =====================================================
    BUTTON START / RESET
