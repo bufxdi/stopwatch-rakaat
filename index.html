@@ -311,29 +311,20 @@ body {
 /* BAR TOTAL */
 
 .total-progress-row {
-
-    width:100%;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 20% minmax(0, 1fr) 20%;
+    align-items: center;
+    column-gap: 8px;
 }
 
 .total-time {
-
-    width:20%;
-
-    font-size:15px;
-
-    font-weight:bold;
-
-    line-height:1;
-
-    white-space:nowrap;
-
-    font-variant-numeric:tabular-nums;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
 }
 
 .total-duration-lines {
@@ -348,37 +339,35 @@ body {
 }
 
 .total-time.start-time {
-    text-align:right;
+    text-align: right;
 }
 
 .total-time.end-time {
-    text-align:left;
+    text-align: left;
+}
+
+#totalEndTime {
+    text-align: left;
+}
+
+#totalStartTime {
+    text-align: right;
 }
 
 .total-progress-container {
-
-    flex:1;
-
-    height:18px;
-
-    background:#ddd;
-
-    border-radius:0;
-
-    overflow:hidden;
+    min-width: 0;
+    height: 18px;
+    background: #ddd;
+    border-radius: 0;
+    overflow: hidden;
 }
 
 #totalProgressBar {
-
-    width:0%;
-
-    height:100%;
-
-    background:#222;
-
-    border-radius:0;
-
-    transition:none;
+    width: 0%;
+    height: 100%;
+    background: #222;
+    border-radius: 0;
+    transition: none;
 }
 
 
